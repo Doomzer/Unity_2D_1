@@ -1,16 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SceneController : MonoBehaviour
 {
     [SerializeField] private MemoryCard originalCard; //Ссылка для карты в сцене.
     [SerializeField] private Sprite[] images; //Массив для ссылок на ресурсы-спрайты.
+    [SerializeField] private TextMesh scoreLabel;
 
     public int gridRows = 2; //Значения, указывающие количество ячеек сетки и их расстояние друг от друга.
     public int gridCols = 4;
     public float offsetX = 6f;
     public float offsetY = 6f;
+
+    private MemoryCard _firstRevealed;
+    private MemoryCard _secondRevealed;
+
+    private int _score = 0;
 
     // Use this for initialization
     void Start ()
@@ -60,9 +67,44 @@ public class SceneController : MonoBehaviour
         return newArray;
     }
 
-    // Update is called once per frame
-    void Update ()
+
+    public bool CanReveal
     {
-		
-	}
+        get { return _secondRevealed == null; }
+    }
+
+    public void CardRevealed(MemoryCard card)
+    {
+        if (_firstRevealed == null)
+        {
+            _firstRevealed = card;
+        }
+        else
+        {
+            _secondRevealed = card;
+            StartCoroutine(CheckMatch());
+        }
+    }
+
+    private IEnumerator CheckMatch()
+    {
+        if (_firstRevealed.ID == _secondRevealed.ID)
+        {
+            _score++; // Увеличиваем счет на единицу, если идентификаторы открытых карт совпадают.
+            scoreLabel.text = "Score: " + _score;
+        }
+        else
+        {
+            yield return new WaitForSeconds(.5f);
+            _firstRevealed.Unreveal(); // Закрытие несовпадающих карт.
+            _secondRevealed.Unreveal();
+        }
+        _firstRevealed = null; // Очистка переменных вне зависимости от того, было ли совпадение.
+        _secondRevealed = null;
+    }
+
+    public void Restart()
+    {        
+        SceneManager.LoadScene("Main_scene");//Эта команда загружает ресурс scene.
+    }
 }

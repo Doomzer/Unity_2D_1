@@ -26,10 +26,16 @@ public class MemoryCard : MonoBehaviour
 
     public void OnMouseDown() //Эта функция вызывается после щелчка на объекте.
     {
-        if (cardBack.activeSelf)
+        if (cardBack.activeSelf && controller.CanReveal)
         {
-            cardBack.SetActive(false); //Делаем объект неактивным / невидимым.
+            cardBack.SetActive(false);
+            controller.CardRevealed(this); //Уведомление контроллера при открытии этой карты.
         }
+    }
+
+    public void Unreveal() //Открытый метод, позволяющий компоненту SceneController снова скрыть карту (вернув на место спрайт card_back).
+    {
+        cardBack.SetActive(true);
     }
 
     // Use this for initialization
